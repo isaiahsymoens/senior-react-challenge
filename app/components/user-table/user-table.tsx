@@ -11,7 +11,7 @@ export const UserTable = ({users, onSelectUser}: UserTableProps) => {
       {users.length === 0 ?
         <div className="text-center py-2">No results found.</div>
         :
-        <table className="w-full min-w-[720px] text-left text-sm">
+        <table className="w-full min-w-180 text-left text-sm">
           <thead className="border-b border-zinc-200 rounded-t-xl text-xs uppercase tracking-wide text-zinc-600">
             <tr>
               <th className="px-4 py-3">Name</th>

@@ -1,3 +1,5 @@
+import {GenderFilter} from "../users/page";
+
 export interface User {
   id: number;
   firstName: string;
@@ -37,11 +39,25 @@ const fetchJson = async <T>(url: string): Promise<T> => {
   return res.json() as Promise<T>;
 }
 
-export const fetchUsers = async({limit, skip, q}: {limit: number, skip: number, q: string}): Promise<UsersResponse> => {
-  const endpoint = q
-    ? `/users/search?q=${encodeURIComponent(q)}&limit=${limit}&skip=${skip}`
-    : `/users?limit=${limit}&skip=${skip}`;
-
+export const fetchUsers = async({
+  limit, 
+  skip, 
+  q, 
+  gender
+}:{
+  limit: number, 
+  skip: number, 
+  q: string, 
+  gender: GenderFilter
+}): Promise<UsersResponse> => {
+  let endpoint = "";
+  if (q.length > 0) {
+    endpoint = `/users/search?q=${encodeURIComponent(q)}&limit=${limit}&skip=${skip}`;    
+  } else if (gender !== "all") {
+    endpoint = `/users/filter?key=gender&value=${gender}&limit=${limit}&skip=${skip}`;  
+  } else {
+    endpoint = `/users?limit=${limit}&skip=${skip}`;
+  } 
   return fetchJson<UsersResponse>(`${DUMMYJSON_BASE_URL}${endpoint}`);
 }
 
