@@ -44,3 +44,7 @@ export const fetchUsers = async({limit, skip, q}: {limit: number, skip: number, 
 
   return fetchJson<UsersResponse>(`${DUMMYJSON_BASE_URL}${endpoint}`);
 }
+
+export const fetchUserById = (id: number) => {
+  return fetchJson<User>(`${DUMMYJSON_BASE_URL}/users/${id}`);
+}

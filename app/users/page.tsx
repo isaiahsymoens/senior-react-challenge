@@ -4,7 +4,8 @@ import {useMemo, useState} from "react";
 import {UserTable} from "../components/user-table/user-table";
 import {keepPreviousData, useQuery} from "@tanstack/react-query";
 import {useDebounced} from "../hooks/useDebounced";
-import {fetchUsers} from "../api/users";
+import {fetchUserById, fetchUsers} from "../api/users";
+import {UserDetailsModal} from "../components/user-details-modal/user-details-modal";
 
 type GenderFilter = "all" | "male" | "female";
 
@@ -14,6 +15,7 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState("");
   const [gender, setGender] = useState<GenderFilter>("all");
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
   const debouncedSearch = useDebounced(searchText.trim(), 400);
   const skip = (page - 1) * PAGE_SIZE;
@@ -24,14 +26,22 @@ export default function UsersPage() {
     placeholderData: keepPreviousData,
   });
 
+  const detailsQuery = useQuery({
+    queryKey: ["user", {id: selectedUserId}],
+    queryFn: () => fetchUserById(selectedUserId as number),
+    enabled: selectedUserId !== null,
+  });
+
   const filteredUsers = useMemo(() => {
     const users = usersQuery.data?.users ?? [];
     if (gender === "all") return users;
     return users.filter(u => u.gender === gender);
   }, [gender, usersQuery]);
 
-  console.log("filteredUsers :", filteredUsers);
-
+  const selectUser = (id: number) => {
+    setSelectedUserId(id as number);
+  }
+  
   const total = usersQuery.data?.total ?? 0;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -41,6 +51,9 @@ export default function UsersPage() {
   return (
     <div className="flex flex-1">
       <div className="w-full max-w-5xl mx-auto flex flex-1 flex-col gap-6 px-4 py-6">
+        <header>
+          <h1 className="text-2xl font-semibold">Users Admin</h1>
+        </header>
         <section className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 shadow-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
             <div className="flex flex-1 flex-col gap-2">
@@ -48,7 +61,10 @@ export default function UsersPage() {
               <input 
                 className="w-full h-10 rounded-lg border border-zinc-200 px-3 text-sm outline-none"
                 value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                  setPage(1);
+                }}
                 placeholder="Search"
               />
             </div>
@@ -74,24 +90,27 @@ export default function UsersPage() {
                 className="border border-zinc-600 rounded-lg px-2 py-1 disabled:opacity-50"
                 onClick={() => setPage(prev => Math.max(1, prev - 1))}
                 disabled={!canPrev || usersQuery.isFetching}
-              >
-                Prev
-              </button>
+              >Prev</button>
               <button
                 className="border border-zinc-600 rounded-lg px-2 py-1 disabled:opacity-50"
                 onClick={() => setPage(prev => Math.min(pageCount, prev + 1))}
                 disabled={!canNext || usersQuery.isFetching}
-              >
-                Next
-              </button>
+              >Next</button>
             </div>
           </div>
         </section>
         <section className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 shadow-sm">
           <UserTable 
             users={filteredUsers}
+            onSelectUser={selectUser}
           />
         </section>
+        <UserDetailsModal 
+          open={selectedUserId !== null}
+          user={detailsQuery.data ?? null}
+          isLoading={detailsQuery.isFetching}
+          onClose={() => setSelectedUserId(null)}
+        />
       </div>
     </div>
   );
