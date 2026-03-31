@@ -6,6 +6,7 @@ import {keepPreviousData, useQuery} from "@tanstack/react-query";
 import {useDebounced} from "../hooks/useDebounced";
 import {fetchUserById, fetchUsers} from "../api/users";
 import {UserDetailsModal} from "../components/user-details-modal/user-details-modal";
+import {Pagination} from "../components/pagination/pagination";
 
 export type GenderFilter = "all" | "male" | "female";
 
@@ -80,24 +81,15 @@ export default function UsersPage() {
               </select>
             </div>
           </div>
-          <div className="flex justify-between">
-            <div className="text-sm">
-              <span>Page {page}{" "}of{" "}{pageCount}</span>
-              {usersQuery.isFetching && <span className="text-xs text-zinc-600 ml-2">Updating...</span>}
-            </div>
-            <div className="flex gap-3">
-              <button
-                className="border border-zinc-600 rounded-lg px-2 py-1 disabled:opacity-50"
-                onClick={() => setPage(prev => Math.max(1, prev - 1))}
-                disabled={!canPrev || usersQuery.isFetching}
-              >Prev</button>
-              <button
-                className="border border-zinc-600 rounded-lg px-2 py-1 disabled:opacity-50"
-                onClick={() => setPage(prev => Math.min(pageCount, prev + 1))}
-                disabled={!canNext || usersQuery.isFetching}
-              >Next</button>
-            </div>
-          </div>
+          <Pagination 
+            page={page}
+            pageCount={pageCount}
+            isLoading={usersQuery.isFetching}
+            canPrev={canPrev}
+            canNext={canNext}
+            onPrev={() => setPage(prev => Math.max(1, prev - 1))}
+            onNext={() => setPage(prev => Math.min(pageCount, prev + 1))}
+          />
         </section>
         <section className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-4 shadow-sm">
           <UserTable 
