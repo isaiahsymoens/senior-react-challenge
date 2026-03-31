@@ -20,7 +20,7 @@ export const UserDetailsModal = ({open, user, isLoading, onClose}: UserDetailsMo
   return (
     <dialog
       ref={ref}
-      className="m-auto min-w-135 h-62.5 rounded-xl border border-zinc-200 p-0 shadow-2xl"
+      className="m-auto w-full max-w-135 h-62.5 rounded-xl border border-zinc-200 p-0 shadow-2xl"
       onClose={onClose}
       onClick={(e) => e.target === e.currentTarget && ref.current?.close()}
     >
